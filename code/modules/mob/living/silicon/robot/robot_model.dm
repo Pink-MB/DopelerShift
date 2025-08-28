@@ -773,7 +773,7 @@
 
 /obj/item/robot_model/peacekeeper/do_transform_animation()
 	..()
-	/*DOPPLER REMOVAL: We are not under ASIMOV.
+	/*DOPPLER REMOVAL START: We are not under ASIMOV.
 	to_chat(loc, span_userdanger("Under ASIMOV, you are an enforcer of the PEACE and preventer of HUMAN HARM. \
 	You are not a security member and you are expected to follow orders and prevent harm above all else. Space law means nothing to you."))
 	*/ // DOPPLER EDIT REMOVAL END
