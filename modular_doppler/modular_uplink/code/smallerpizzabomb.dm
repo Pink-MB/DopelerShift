@@ -4,7 +4,7 @@
 /obj/item/bombcore/miniature/pizza/traitor
 	range_heavy = 1
 
-/obj/item/pizzabox/bomb/traitor/Initialize(mapload)
+/obj/item/pizzabox/bomb_traitor/Initialize(mapload)
 	. = ..()
 	if(!pizza)
 		var/randompizza = pick(subtypesof(/obj/item/food/pizza) - /obj/item/food/pizza/flatbread) //also disincludes another base type
