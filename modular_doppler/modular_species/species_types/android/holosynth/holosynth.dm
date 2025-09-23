@@ -53,7 +53,7 @@
 	qdel(glasscomp)
 	qdel(regencomp)
 
-
+	species_holder.remove_filter(list("HOLO: Color and Transparent","HOLO: Scanline"))
 
 #undef HOLOSYNTH_BRUTEMULT
 #undef HOLOSYNTH_BURNMULT
