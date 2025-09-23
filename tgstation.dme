@@ -7404,6 +7404,8 @@
 #include "modular_doppler\modular_quirks\excitable\excitable.dm"
 #include "modular_doppler\modular_quirks\fragility\code\fragile.dm"
 #include "modular_doppler\modular_quirks\hardened_soles\hardened_soles.dm"
+#include "modular_doppler\modular_quirks\holographic\holopassthrough.dm"
+#include "modular_doppler\modular_quirks\holographic\holosynth.dm"
 #include "modular_doppler\modular_quirks\left_handed\left_handed.dm"
 #include "modular_doppler\modular_quirks\linguist\linguist.dm"
 #include "modular_doppler\modular_quirks\night_vision\night_vision.dm"
