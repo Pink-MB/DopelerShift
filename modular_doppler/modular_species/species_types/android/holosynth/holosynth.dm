@@ -185,7 +185,7 @@
 /obj/item/pen/holoprojector/click_alt(mob/user)
 	balloon_alert(user, "location reset")
 	playsound(src, 'sound/items/pen_click.ogg', 30, TRUE, -3)
-	saved_loc = get_turf(user)
+	saved_loc = get_turf(user) //this does not work unless the linked mob is in the pen figure it out when its not 7am and you can think
 
 	return CLICK_ACTION_SUCCESS
 
