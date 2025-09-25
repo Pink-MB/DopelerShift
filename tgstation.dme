@@ -7454,6 +7454,7 @@
 #include "modular_doppler\modular_species\species_types\akula\code\wetsuit.dm"
 #include "modular_doppler\modular_species\species_types\android\android.dm"
 #include "modular_doppler\modular_species\species_types\android\holosynth\holopassthrough.dm"
+#include "modular_doppler\modular_species\species_types\android\holosynth\holosynth_projector.dm"
 #include "modular_doppler\modular_species\species_types\android\holosynth\holosynth.dm"
 #include "modular_doppler\modular_species\species_types\android\android_hud.dm"
 #include "modular_doppler\modular_species\species_types\android\android_parts.dm"

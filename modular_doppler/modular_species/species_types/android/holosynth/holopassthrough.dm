@@ -19,9 +19,9 @@
 	passwindow_on(owner, type)
 
 	//Need this to happen post timer but pre move. Otherwise touching glass will instantly strip ppl
-	for(var/obj/item/real in owner)
-		owner.dropItemToGround(real)
-
+	//for(var/obj/item/real in owner)
+	//.	owner.dropItemToGround(real)
+	owner.unequip_everything()
 
 	//We need to do this twice if it's a full window bc otherwise they could reach behind them for their items
 	var/dirToMove = get_dir(owner, bumpee)

@@ -34,7 +34,8 @@
 	. = ..()
 	var/mob/living/carbon/human/species_holder = target
 
-	target.makeHologram()
+	target.makeHologram_glowless()
+	//TODO: Re-Add Glow
 
 	species_holder.physiology.brute_mod *= HOLOSYNTH_BRUTEMULT
 	species_holder.physiology.burn_mod *= HOLOSYNTH_BURNMULT
@@ -42,11 +43,12 @@
 
 	species_holder.AddComponent(/datum/component/glass_passer/holosynth, pass_time = 1 SECONDS)
 	species_holder.AddComponent(/datum/component/regenerator, brute_per_second = 0.2, burn_per_second = 0.2, outline_colour = COLOR_HEALING_CYAN)
-
+	species_holder.AddComponent(/datum/component/holographic_nature)
 
 	//Leashing time
 	owner_projector = new /obj/item/pen/holoprojector (get_turf(species_holder))
 	owner_projector.linked_mob = species_holder
+	species_holder.put_in_hands(owner_projector)
 
 	species_holder.AddComponent(\
 		/datum/component/leash,\
@@ -63,12 +65,14 @@
 	species_holder.physiology.burn_mod /= HOLOSYNTH_BURNMULT
 	species_holder.max_grab = GRAB_KILL
 
-	var/datum/component/glass_passer/holosynth/glasscomp = species_holder.GetComponent(/datum/component/glass_passer/holosynth)
-	var/datum/component/regenerator/regencomp = species_holder.GetComponent(/datum/component/regenerator)
-	var/datum/component/leash/projector = species_holder.GetComponent(/datum/component/leash)
-	qdel(glasscomp)
-	qdel(regencomp)
-	qdel(projector)
+	var/comps_to_delete = list(
+	species_holder.GetComponent(/datum/component/glass_passer/holosynth),
+	species_holder.GetComponent(/datum/component/regenerator),
+	species_holder.GetComponent(/datum/component/leash),
+	species_holder.GetComponent(/datum/component/holographic_nature)
+	)
+	for(var/comp in comps_to_delete)
+		qdel(comp)
 
 	species_holder.remove_filter(list("HOLO: Color and Transparent","HOLO: Scanline"))
 
@@ -142,55 +146,19 @@
 	))
 	return perks
 
-//THE PROJECTOR
-/obj/item/pen/holoprojector
-	name = "Holosynth Projector-Magnet Combo"
-	desc = "A complex mechanism that both projects the form of a hologram and manipulates its gel canvas.\
-	Miraculously, it also doubles as a pen - though not at the same time. ALT-click to reset the projection destination"
-	icon_state = "pen_blue"
-	var/mob/living/carbon/human/linked_mob
-	var/turf/saved_loc
-	var/contents/interior
-
-/obj/item/pen/holoprojector/Initialize(mapload)
-	. = ..()
-	saved_loc = loc //Important fallback initial conditions u see
-
-/obj/item/pen/holoprojector/create_transform_component()
-	AddComponent( \
-		/datum/component/transforming, \
-		start_transformed = FALSE, \
-		sharpness_on = NONE, \
-		inhand_icon_change = FALSE, \
-		w_class_on = w_class, \
-	)
-
-/obj/item/pen/holoprojector/on_transform(obj/item/source, mob/user, active)
-	SIGNAL_HANDLER		//todo: find out what this warning
-
-	if(user)
-		balloon_alert(user, "clicked")
-	playsound(src, 'sound/items/pen_click.ogg', 30, TRUE, -3)
-	icon_state = initial(icon_state) + (active ? "_retracted" : "")
-	update_appearance(UPDATE_ICON)
-
-	if(active) //If you WERE active we save loc and place our creature into pen
-		saved_loc = get_turf(linked_mob)
-		linked_mob.loc = src
-	else	//Otherwise, put the hologram back
-		linked_mob.loc = saved_loc
-
-	return COMPONENT_NO_DEFAULT_MESSAGE
-
-/obj/item/pen/holoprojector/click_alt(mob/user)
-	balloon_alert(user, "location reset")
-	playsound(src, 'sound/items/pen_click.ogg', 30, TRUE, -3)
-	saved_loc = get_turf(user) //this does not work unless the linked mob is in the pen figure it out when its not 7am and you can think
-
-	return CLICK_ACTION_SUCCESS
-
-//TODO: Murder the hologram if the projector is destroyed
-//		Forbid a Hologram from activating their projector
+//our own snowflake version of /atom/proc/makeHologram() without the glow
+/atom/proc/makeHologram_glowless(opacity = 0.5)
+	add_filter("HOLO: Color and Transparent", 1, color_matrix_filter(rgb(125,180,225, opacity * 255)))
+	var/atom/movable/scanline = new(null)
+	scanline.icon = 'icons/effects/effects.dmi'
+	scanline.icon_state = "scanline"
+	scanline.appearance_flags |= RESET_TRANSFORM
+	var/static/uid_scan = 0
+	scanline.render_target = "*HoloScanline [uid_scan]"
+	uid_scan++
+	add_filter("HOLO: Scanline", 2, alpha_mask_filter(render_source = scanline.render_target))
+	add_overlay(scanline)
+	qdel(scanline)
 
 #undef HOLOSYNTH_BRUTEMULT
 #undef HOLOSYNTH_BURNMULT
