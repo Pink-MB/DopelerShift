@@ -46,7 +46,7 @@
 	species_holder.AddComponent(/datum/component/holographic_nature)
 
 	//Leashing time
-	owner_projector = new /obj/item/pen/holoprojector (get_turf(species_holder))
+	owner_projector = new /obj/item/pen/holoprojector (get_turf(species_holder), species_holder)
 	owner_projector.linked_mob = species_holder
 	species_holder.put_in_hands(owner_projector)
 
@@ -75,7 +75,6 @@
 		qdel(comp)
 
 	species_holder.remove_filter(list("HOLO: Color and Transparent","HOLO: Scanline"))
-
 
 // Lore Box
 

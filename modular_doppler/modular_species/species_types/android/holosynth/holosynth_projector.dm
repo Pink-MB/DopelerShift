@@ -1,15 +1,20 @@
 /obj/item/pen/holoprojector
 	name = "Holosynth Projector-Magnet Combo"
 	desc = "A complex mechanism that both projects the form of a hologram and manipulates its aerogel canvas.\
-	Miraculously, it also doubles as a pen - though not at the same time. ALT-click to reset the projection destination"
+	Miraculously, it also doubles as a pen."
 	icon_state = "pen_blue"
 	var/mob/living/carbon/human/linked_mob
 	var/turf/saved_loc
 	var/contents/interior
+	var/beam
 
-/obj/item/pen/holoprojector/Initialize(mapload)
+/obj/item/pen/holoprojector/Initialize(mapload, linked_mob)
 	. = ..()
-	saved_loc = loc //Important fallback initial conditions u see
+	if(linked_mob)
+		src.linked_mob = linked_mob
+		saved_loc = get_turf(linked_mob)
+	else
+		src.linked_mob = null
 
 /obj/item/pen/holoprojector/create_transform_component()
 	AddComponent( \
@@ -36,6 +41,7 @@
 /obj/item/pen/holoprojector/Destroy()
 	ASYNC
 		kill_that_mob()
+	linked_mob = null
 	. = ..()
 
 /obj/item/pen/holoprojector/attack_self(mob/user)
@@ -67,6 +73,4 @@
 /*To Test
 Glass phasing/item dropping
 Pen clicking/writing/targetting
-Hologram component
-requipment
 */
