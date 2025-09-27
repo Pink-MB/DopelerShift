@@ -21,15 +21,8 @@
 	)
 
 /obj/item/pen/holoprojector/on_transform(obj/item/source, mob/user, active)
-	SIGNAL_HANDLER
-
-	if(user)
-		balloon_alert(user, "clicked")
-	playsound(src, 'sound/items/pen_click.ogg', 30, TRUE, -3)
-	icon_state = initial(icon_state) + (active ? "_retracted" : "")
-	update_appearance(UPDATE_ICON)
-
-	if(!active) //If you WERE active we save loc and place our creature into pen
+	. = ..()
+	if(active) //If you WERE active we save loc and place our creature into pen
 		saved_loc = get_turf(linked_mob)
 		new /obj/effect/temp_visual/guardian/phase/out (saved_loc)
 		linked_mob.unequip_everything()
@@ -41,14 +34,8 @@
 	return COMPONENT_NO_DEFAULT_MESSAGE
 
 /obj/item/pen/holoprojector/Destroy()
-	linked_mob.visible_message(
-		span_danger("[linked_mob]'s whole body begins to flicker, shudder and fall apart!"),
-		span_userdanger("You feel your projector being destroyed! Your form loses cohesion!")
-	)
-	// You are GOING to GO no matter WHAT
-	var/holodestroyflags = IGNORE_USER_LOC_CHANGE | IGNORE_TARGET_LOC_CHANGE | IGNORE_HELD_ITEM | IGNORE_INCAPACITATED | IGNORE_SLOWDOWNS
-	if(do_after(linked_mob, 20 SECONDS, linked_mob, holodestroyflags))
-		linked_mob.gib(DROP_ALL_REMAINS & ~DROP_BODYPARTS) //bright side, your brain's in there. Someone'll use it I'm sure.
+	ASYNC
+		kill_that_mob()
 	. = ..()
 
 /obj/item/pen/holoprojector/attack_self(mob/user)
@@ -66,6 +53,16 @@
 
 	saved_loc = get_turf(interacting_with)
 	balloon_alert(user, "location targetted")
+
+/obj/item/pen/holoprojector/proc/kill_that_mob()
+	linked_mob.visible_message(
+		span_danger("[linked_mob]'s whole body begins to flicker, shudder and fall apart!"),
+		span_userdanger("You feel your projector being destroyed! Your form loses cohesion!")
+	)
+	// You are GOING to GO no matter WHAT
+	var/holodestroyflags = IGNORE_USER_LOC_CHANGE | IGNORE_TARGET_LOC_CHANGE | IGNORE_HELD_ITEM | IGNORE_INCAPACITATED | IGNORE_SLOWDOWNS
+	if(do_after(linked_mob, 20 SECONDS, linked_mob, holodestroyflags))
+		linked_mob.gib(DROP_ALL_REMAINS & ~DROP_BODYPARTS) //bright side, your brain's in there. Someone'll use it I'm sure.
 
 /*To Test
 Glass phasing/item dropping

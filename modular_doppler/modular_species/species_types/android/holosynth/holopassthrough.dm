@@ -31,3 +31,12 @@
 	//TODO: Make sure this works as intended with fulltile and directional windows and doesn't runtime when bumped on other things
 
 	passwindow_off(owner, type)
+
+/// Make the window get wibbly filters without parent proc making them passable
+/datum/component/glass_passer/holosynth/blomperize(obj/structure/structure)
+	apply_wibbly_filters(structure)
+	addtimer(CALLBACK(src, PROC_REF(unblomperize), structure), deform_glass)
+
+/// Reset the windows wibbly
+/datum/component/glass_passer/holosynth/unblomperize(obj/structure/structure)
+	remove_wibbly_filters(structure, 0.5 SECONDS)

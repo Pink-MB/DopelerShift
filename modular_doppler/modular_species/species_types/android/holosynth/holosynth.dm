@@ -41,7 +41,7 @@
 	species_holder.physiology.burn_mod *= HOLOSYNTH_BURNMULT
 	species_holder.max_grab = GRAB_PASSIVE //you're like, only half solid yk
 
-	species_holder.AddComponent(/datum/component/glass_passer/holosynth, pass_time = 1 SECONDS)
+	species_holder.AddComponent(/datum/component/glass_passer/holosynth, pass_time = 1 SECONDS, deform_glass = 0.5 SECONDS)
 	species_holder.AddComponent(/datum/component/regenerator, brute_per_second = 0.2, burn_per_second = 0.2, outline_colour = COLOR_HEALING_CYAN)
 	species_holder.AddComponent(/datum/component/holographic_nature)
 
@@ -87,15 +87,6 @@
 		"Somewhere between an android and a hologram, these semi-physical autonomous units are extremely vulnerable to heat and electricity\
 		 while early models were incapable of causing direct harm, advancements in dynamic aerogel density have made this a possibility.\
 		 A once popular choice among more wealthy customers (silicon and uploaded organics alike) though their lack of robustness makes them somewhat inept for physical work."
-	)
-
-//Blood
-/datum/blood_type/holosynth
-	name = BLOOD_TYPE_HOLOGEL
-	color = BLOOD_COLOR_HOLOGEL
-	restoration_chem = /datum/reagent/silicon
-	compatible_types = list(
-		/datum/blood_type/synthetic,
 	)
 
 //Character creation Perks
