@@ -41,7 +41,6 @@
 /obj/item/pen/holoprojector/Destroy()
 	ASYNC
 		kill_that_mob()
-	linked_mob = null
 	. = ..()
 
 /obj/item/pen/holoprojector/attack_self(mob/user)
@@ -69,7 +68,7 @@
 	var/holodestroyflags = IGNORE_USER_LOC_CHANGE | IGNORE_TARGET_LOC_CHANGE | IGNORE_HELD_ITEM | IGNORE_INCAPACITATED | IGNORE_SLOWDOWNS
 	if(do_after(linked_mob, 20 SECONDS, linked_mob, holodestroyflags))
 		linked_mob.gib(DROP_ALL_REMAINS & ~DROP_BODYPARTS) //bright side, your brain's in there. Someone'll use it I'm sure.
-
+	linked_mob = null
 /*To Test
 Glass phasing/item dropping
 Pen clicking/writing/targetting

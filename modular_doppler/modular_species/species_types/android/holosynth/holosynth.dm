@@ -27,6 +27,7 @@
 	)
 	exotic_bloodtype = BLOOD_TYPE_HOLOGEL
 	var/obj/item/pen/holoprojector/owner_projector
+	var/glow
 
 //Species Adding and Removal
 
@@ -35,7 +36,7 @@
 	var/mob/living/carbon/human/species_holder = target
 
 	target.makeHologram_glowless()
-	//TODO: Re-Add Glow
+	glow = target.makeEmisive()
 
 	species_holder.physiology.brute_mod *= HOLOSYNTH_BRUTEMULT
 	species_holder.physiology.burn_mod *= HOLOSYNTH_BURNMULT
@@ -75,7 +76,8 @@
 		qdel(comp)
 
 	species_holder.remove_filter(list("HOLO: Color and Transparent","HOLO: Scanline"))
-
+	species_holder.cut_overlay(glow)
+	owner_projector.linked_mob = null
 // Lore Box
 
 /datum/species/android/holosynth/get_species_description()
@@ -149,6 +151,21 @@
 	add_filter("HOLO: Scanline", 2, alpha_mask_filter(render_source = scanline.render_target))
 	add_overlay(scanline)
 	qdel(scanline)
+
+/atom/proc/makeEmisive()
+	if(!render_target)
+		var/static/uid = 0
+		render_target = "HOLOGRAM [uid]"
+		uid++
+	var/static/atom/movable/render_step/emissive/glow
+	if(!glow)
+		glow = new(null)
+	glow.render_source = render_target
+	SET_PLANE_EXPLICIT(glow, initial(glow.plane), src)
+	var/mutable_appearance/glow_appearance = new(glow)
+	add_overlay(glow_appearance)
+	LAZYADD(update_overlays_on_z, glow_appearance)
+	return glow_appearance
 
 #undef HOLOSYNTH_BRUTEMULT
 #undef HOLOSYNTH_BURNMULT
