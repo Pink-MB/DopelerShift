@@ -1,12 +1,11 @@
 /obj/item/pen/holoprojector
 	name = "Holosynth Projector-Magnet Combo"
-	desc = "A complex mechanism that both projects the form of a hologram and manipulates its aerogel canvas.\
+	desc = "A complex mechanism that both projects the form of a hologram and manipulates its aerogel canvas. \
 	Miraculously, it also doubles as a pen."
 	icon_state = "pen_blue"
 	var/mob/living/carbon/human/linked_mob
 	var/turf/saved_loc
-	var/contents/interior
-	var/beam
+
 
 /obj/item/pen/holoprojector/Initialize(mapload, linked_mob)
 	. = ..()
@@ -39,8 +38,9 @@
 	return COMPONENT_NO_DEFAULT_MESSAGE
 
 /obj/item/pen/holoprojector/Destroy()
-	ASYNC
-		kill_that_mob()
+	if(!isnull(linked_mob))
+		ASYNC
+			kill_that_mob()
 	. = ..()
 
 /obj/item/pen/holoprojector/attack_self(mob/user)
@@ -55,8 +55,11 @@
 	if(linked_mob.loc != src)
 		balloon_alert(user, "Can't target while projection is active")
 		return
-
-	saved_loc = get_turf(interacting_with)
+	var/turf/turf_target = get_turf(interacting_with)
+	if(turf_target.density == 1)
+		balloon_alert(user, "Can't target a solid object!")
+		return
+	saved_loc = turf_target
 	balloon_alert(user, "location targetted")
 
 /obj/item/pen/holoprojector/proc/kill_that_mob()

@@ -34,6 +34,9 @@
 
 /// Make the window get wibbly filters without parent proc making them passable
 /datum/component/glass_passer/holosynth/blomperize(obj/structure/structure)
+	var/obj/structure/window/wumpee = structure
+	if(istype(wumpee) || !wumpee.fulltile)
+		return
 	apply_wibbly_filters(structure)
 	addtimer(CALLBACK(src, PROC_REF(unblomperize), structure), deform_glass)
 

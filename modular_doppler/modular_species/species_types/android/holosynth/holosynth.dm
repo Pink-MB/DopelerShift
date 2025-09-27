@@ -25,6 +25,7 @@
 		TRAIT_NEVER_WOUNDED,
 		TRAIT_EASYBLEED
 	)
+	gib_anim = "liquify"
 	exotic_bloodtype = BLOOD_TYPE_HOLOGEL
 	var/obj/item/pen/holoprojector/owner_projector
 	var/glow
