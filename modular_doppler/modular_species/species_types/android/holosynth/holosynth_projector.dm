@@ -38,7 +38,7 @@
 	return COMPONENT_NO_DEFAULT_MESSAGE
 
 /obj/item/pen/holoprojector/Destroy()
-	if(!isnull(linked_mob))
+	if(linked_mob)
 		ASYNC
 			kill_that_mob()
 	. = ..()
@@ -72,7 +72,8 @@
 	if(do_after(linked_mob, 20 SECONDS, linked_mob, holodestroyflags))
 		linked_mob.gib(DROP_ALL_REMAINS & ~DROP_BODYPARTS) //bright side, your brain's in there. Someone'll use it I'm sure.
 	linked_mob = null
-/*To Test
-Glass phasing/item dropping
-Pen clicking/writing/targetting
-*/
+
+/obj/item/pen/holoprojector/examine()
+	. = ..()
+	if(linked_mob)
+		. += span_info("This one belongs to [linked_mob].")

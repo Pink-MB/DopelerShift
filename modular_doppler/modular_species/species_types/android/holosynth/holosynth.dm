@@ -23,7 +23,6 @@
 		TRAIT_NODISMEMBER,
 		TRAIT_NO_AUGMENTS,
 		TRAIT_NEVER_WOUNDED,
-		TRAIT_EASYBLEED
 	)
 	gib_anim = "liquify"
 	exotic_bloodtype = BLOOD_TYPE_HOLOGEL
@@ -36,8 +35,8 @@
 	. = ..()
 	var/mob/living/carbon/human/species_holder = target
 
-	target.makeHologram_glowless()
-	glow = target.makeEmisive()
+	species_holder.makeHologram_glowless()
+	glow = species_holder.makeEmisive()
 
 	species_holder.physiology.brute_mod *= HOLOSYNTH_BRUTEMULT
 	species_holder.physiology.burn_mod *= HOLOSYNTH_BURNMULT
@@ -88,7 +87,9 @@
 	return list(
 		"Somewhere between an android and a hologram, these semi-physical autonomous units are extremely vulnerable to heat and electricity\
 		 while early models were incapable of causing direct harm, advancements in dynamic aerogel density have made this a possibility.\
-		 A once popular choice among more wealthy customers (silicon and uploaded organics alike) though their lack of robustness makes them somewhat inept for physical work."
+		 A niche choice more popular among wealthy customers (silicon and uploaded organics alike) - their lack of robustness makes them somewhat inept for physical work, they were excellent at scounting or clerical work.",
+		 "As of late, the design of the required holoprojection equipment, has shrunk considerably; \
+		 With an electromagnetic controller suite, hologram projection aparatus, and a ball point writing implement all fitting into the sleek pen chassis."
 	)
 
 //Character creation Perks

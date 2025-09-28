@@ -19,8 +19,6 @@
 	passwindow_on(owner, type)
 
 	//Need this to happen post timer but pre move. Otherwise touching glass will instantly strip ppl
-	//for(var/obj/item/real in owner)
-	//.	owner.dropItemToGround(real)
 	owner.unequip_everything()
 
 	//We need to do this twice if it's a full window bc otherwise they could reach behind them for their items
@@ -28,18 +26,17 @@
 	try_move_adjacent(owner, dirToMove)
 	if(wumpee.fulltile)
 		try_move_adjacent(owner, dirToMove)
-	//TODO: Make sure this works as intended with fulltile and directional windows and doesn't runtime when bumped on other things
 
 	passwindow_off(owner, type)
 
 /// Make the window get wibbly filters without parent proc making them passable
 /datum/component/glass_passer/holosynth/blomperize(obj/structure/structure)
 	var/obj/structure/window/wumpee = structure
-	if(istype(wumpee) || !wumpee.fulltile)
+	if(istype(wumpee) || !wumpee.fulltile) //need to check for this otherwise we runtime when passing over grills or not full tile windows
 		return
 	apply_wibbly_filters(structure)
 	addtimer(CALLBACK(src, PROC_REF(unblomperize), structure), deform_glass)
 
-/// Reset the windows wibbly
+/// Reset the window's wibbly
 /datum/component/glass_passer/holosynth/unblomperize(obj/structure/structure)
 	remove_wibbly_filters(structure, 0.5 SECONDS)
