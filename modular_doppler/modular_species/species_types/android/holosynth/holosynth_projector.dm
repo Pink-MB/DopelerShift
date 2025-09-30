@@ -3,7 +3,9 @@
 	desc = "A complex mechanism that both projects the form of a hologram and manipulates its aerogel canvas. \
 	Miraculously, it also doubles as a pen."
 	icon = 'modular_doppler/modular_species/species_types/android/holosynth/holosynth_pen.dmi'
+	worn_icon = 'modular_doppler/modular_species/species_types/android/holosynth/holosynth_pen.dmi'
 	icon_state = "Holopen"
+	worn_icon_state = "w_holopen"
 	slot_flags = ITEM_SLOT_BELT | ITEM_SLOT_EARS
 	w_class = WEIGHT_CLASS_TINY
 	var/colour = BLOOD_COLOR_HOLOGEL
@@ -36,7 +38,7 @@
 		blood_heal = 2, \
 		simple_heal = 1.2, \
 		wound_clotting = 0.1, \
-		organ_healing = list(ORGAN_SLOT_BRAIN = 1, ORGAN_SLOT_HEART = 1, ORGAN_SLOT_EARS = 2, ORGAN_SLOT_EYES = 2, ORGAN_SLOT_TONGUE = 3), \
+		organ_healing = list(ORGAN_SLOT_BRAIN = 1, ORGAN_SLOT_HEART = 0.5, ORGAN_SLOT_EARS = 1, ORGAN_SLOT_EYES = 1, ORGAN_SLOT_TONGUE = 1.5), \
 		requires_visibility = FALSE, \
 		limit_to_trait = TRAIT_HOLOSYNTH, \
 		healing_color = BLOOD_COLOR_HOLOGEL, \
@@ -58,7 +60,11 @@
 		balloon_alert(user, "clicked")
 	playsound(src, 'sound/items/pen_click.ogg', 30, TRUE, -3)
 	icon_state = initial(icon_state) + (active ? "_writing" : "")
+	worn_icon_state = initial(worn_icon_state) + (active ? "_writing" : "")
 	update_appearance(UPDATE_ICON)
+
+	if(isnull(linked_mob))
+		return
 
 	if(active) //If you WERE active we save loc and place our creature into pen
 		saved_loc = get_turf(linked_mob)
@@ -85,6 +91,8 @@
 	. = ..()
 
 /obj/item/holosynth_pen/ranged_interact_with_atom(atom/interacting_with, mob/living/user, list/modifiers)
+	if(isnull(linked_mob))
+		return
 	if(user == linked_mob)
 		return
 	if(linked_mob.loc != src)
