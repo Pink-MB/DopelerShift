@@ -23,10 +23,11 @@
 		TRAIT_NODISMEMBER,
 		TRAIT_NO_AUGMENTS,
 		TRAIT_NEVER_WOUNDED,
+		TRAIT_HOLOSYNTH
 	)
 	gib_anim = "liquify"
 	exotic_bloodtype = BLOOD_TYPE_HOLOGEL
-	var/obj/item/pen/holoprojector/owner_projector
+	var/obj/item/holosynth_pen/owner_projector
 	var/glow
 
 //Species Adding and Removal
@@ -43,11 +44,10 @@
 	species_holder.max_grab = GRAB_PASSIVE //you're like, only half solid yk
 
 	species_holder.AddComponent(/datum/component/glass_passer/holosynth, pass_time = 1 SECONDS, deform_glass = 0.5 SECONDS)
-	species_holder.AddComponent(/datum/component/regenerator, brute_per_second = 0.2, burn_per_second = 0.2, outline_colour = COLOR_HEALING_CYAN)
 	species_holder.AddComponent(/datum/component/holographic_nature)
 
 	//Leashing time
-	owner_projector = new /obj/item/pen/holoprojector (get_turf(species_holder), species_holder)
+	owner_projector = new /obj/item/holosynth_pen (get_turf(species_holder), species_holder)
 	owner_projector.linked_mob = species_holder
 	species_holder.put_in_hands(owner_projector)
 
@@ -68,7 +68,6 @@
 
 	var/comps_to_delete = list(
 	species_holder.GetComponent(/datum/component/glass_passer/holosynth),
-	species_holder.GetComponent(/datum/component/regenerator),
 	species_holder.GetComponent(/datum/component/leash),
 	species_holder.GetComponent(/datum/component/holographic_nature)
 	)

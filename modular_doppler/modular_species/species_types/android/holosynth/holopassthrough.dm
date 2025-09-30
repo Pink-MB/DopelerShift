@@ -13,7 +13,7 @@
 		return
 
 	if(ascarbon.handcuffed || ascarbon.legcuffed)
-		ascarbon.balloon_alert(ascarbon, "Restrained!")
+		ascarbon.balloon_alert(ascarbon, "restrained!")
 		return
 
 	passwindow_on(owner, type)
@@ -32,7 +32,7 @@
 /// Make the window get wibbly filters without parent proc making them passable
 /datum/component/glass_passer/holosynth/blomperize(obj/structure/structure)
 	var/obj/structure/window/wumpee = structure
-	if(istype(wumpee) || !wumpee.fulltile) //need to check for this otherwise we runtime when passing over grills or not full tile windows
+	if(!istype(wumpee) || !wumpee.fulltile) //need to check for this otherwise we runtime when passing over grills or not full tile windows
 		return
 	apply_wibbly_filters(structure)
 	addtimer(CALLBACK(src, PROC_REF(unblomperize), structure), deform_glass)
