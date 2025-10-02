@@ -68,7 +68,7 @@
 	var/turf/saved_loc = saved_loc_ref?.resolve()
 
 	if(isnull(linked_mob))
-		return
+		return COMPONENT_NO_DEFAULT_MESSAGE
 
 	if(active) //If you WERE active we save loc and place our creature into pen
 		saved_loc = get_turf(linked_mob)

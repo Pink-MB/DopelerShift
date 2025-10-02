@@ -1,9 +1,11 @@
 #define HOLOSYNTH_BRUTEMULT 3
 #define HOLOSYNTH_BURNMULT 5
 #define HOLOSYNTH_RANGE 9
+#define HOLOSYNTH_OPACITY 0.6
 
 /datum/species/android/holosynth
 	name = "Holosynth"
+	preview_outfit = /datum/outfit/holosynth_preview
 	id = SPECIES_HOLOSYNTH
 	inherent_traits = list(
 		TRAIT_MUTANT_COLORS,
@@ -38,8 +40,8 @@
 	. = ..()
 	var/mob/living/carbon/human/species_holder = target
 
-	make_hologram_glowless(0.5, species_holder)
-	make_emissive(species_holder)
+	// make_hologram_glowless(0.5, species_holder)
+	// make_emissive(species_holder)
 
 	species_holder.physiology.brute_mod *= HOLOSYNTH_BRUTEMULT
 	species_holder.physiology.burn_mod *= HOLOSYNTH_BURNMULT
@@ -47,6 +49,7 @@
 
 	species_holder.AddComponent(/datum/component/glass_passer/holosynth, pass_time = 1 SECONDS, deform_glass = 0.5 SECONDS)
 	species_holder.AddComponent(/datum/component/holographic_nature)
+	species_holder.AddComponent(/datum/component/holosynth_effects)
 
 	//Leashing time
 	var/obj/item/holosynth_pen/owner_projector = new /obj/item/holosynth_pen (get_turf(species_holder), species_holder)
@@ -71,13 +74,12 @@
 	var/comps_to_delete = list(
 	species_holder.GetComponent(/datum/component/glass_passer/holosynth),
 	species_holder.GetComponent(/datum/component/leash),
-	species_holder.GetComponent(/datum/component/holographic_nature)
+	species_holder.GetComponent(/datum/component/holographic_nature),
+	species_holder.GetComponent(/datum/component/holosynth_effects)
 	)
 	for(var/comp in comps_to_delete)
 		qdel(comp)
 
-	species_holder.remove_filter(list("HOLO: Color and Transparent","HOLO: Scanline"))
-	species_holder.cut_overlay(glow)
 
 	var/obj/item/holosynth_pen/pen_to_unlink = owner_projector_ref?.resolve()
 	if(pen_to_unlink)
@@ -141,9 +143,49 @@
 	))
 	return perks
 
-//our own snowflake version of /atom/proc/makeHologram() without the glow
-/datum/species/android/holosynth/proc/make_hologram_glowless(opacity = 0.5, mob/target)
-	target.add_filter("HOLO: Color and Transparent", 1, color_matrix_filter(rgb(125,180,225, opacity * 255)))
+/datum/species/android/get_species_description()
+	return "Holosynths are a subtype of Androids; they're made of soft-light, only semi-solid and dependant on a projection device"
+
+/datum/outfit/holosynth_preview
+	name = "Holosynth (Species Preview)"
+
+/datum/species/android/holosynth/prepare_human_for_preview(mob/living/carbon/human/human_for_preview)
+	human_for_preview.set_haircolor("#CCECFF", update = FALSE)
+	human_for_preview.set_hairstyle("Mia", update = TRUE)
+	human_for_preview.eye_color_left = "#66CCFF"
+	human_for_preview.eye_color_right = "#66CCFF"
+	human_for_preview.dna.features["frame_list"] = list(
+		BODY_ZONE_HEAD = /obj/item/bodypart/head/robot/android/mc,
+		BODY_ZONE_CHEST = /obj/item/bodypart/chest/robot/android/bs_one,
+		BODY_ZONE_L_ARM = /obj/item/bodypart/arm/left/robot/android/bs_one,
+		BODY_ZONE_R_ARM = /obj/item/bodypart/arm/right/robot/android/bs_one,
+		)
+	regenerate_organs(human_for_preview)
+	human_for_preview.update_body(is_creating = TRUE)
+
+/datum/component/holosynth_effects
+	/// Tracks the emissive overlay glow for later deletion
+	var/mutable_appearance/glow
+	/// Our Parent as a human since some of the fields we're accessing aren't on /datum
+	var/mob/living/carbon/human/parent_as_human
+
+/datum/component/holosynth_effects/Initialize()
+	if(!ishuman(parent))
+		return COMPONENT_INCOMPATIBLE
+	parent_as_human = parent
+	. = ..()
+
+/datum/component/holosynth_effects/RegisterWithParent()
+	make_hologram_glowless()
+	glow = make_emissive()
+
+/datum/component/holosynth_effects/UnregisterFromParent()
+	parent_as_human.remove_filter(list("HOLO: Color and Transparent","HOLO: Scanline"))
+	parent_as_human.cut_overlay(glow)
+
+
+/datum/component/holosynth_effects/proc/make_hologram_glowless()
+	parent_as_human.add_filter("HOLO: Color and Transparent", 1, color_matrix_filter(rgb(125,180,225, HOLOSYNTH_OPACITY * 255)))
 	var/atom/movable/scanline = new(null)
 	scanline.icon = 'icons/effects/effects.dmi'
 	scanline.icon_state = "scanline"
@@ -151,25 +193,26 @@
 	var/static/uid_scan = 0
 	scanline.render_target = "*HoloScanline [uid_scan]"
 	uid_scan++
-	target.add_filter("HOLO: Scanline", 2, alpha_mask_filter(render_source = scanline.render_target))
-	target.add_overlay(scanline)
+	parent_as_human.add_filter("HOLO: Scanline", 2, alpha_mask_filter(render_source = scanline.render_target))
+	parent_as_human.add_overlay(scanline)
 	qdel(scanline)
 
-/datum/species/android/holosynth/proc/make_emissive(mob/target)
-	if(!target.render_target)
+/datum/component/holosynth_effects/proc/make_emissive()
+	if(!parent_as_human.render_target)
 		var/static/uid = 0
-		target.render_target = "HOLOGRAM [uid]"
+		parent_as_human.render_target = "HOLOGRAM [uid]"
 		uid++
 	var/static/atom/movable/render_step/emissive/glow
 	if(!glow)
 		glow = new(null)
-	glow.render_source = target.render_target
-	SET_PLANE_EXPLICIT(glow, initial(glow.plane), target)
+	glow.render_source = parent_as_human.render_target
+	SET_PLANE_EXPLICIT(glow, initial(glow.plane), parent_as_human)
 	var/mutable_appearance/glow_appearance = new(glow)
-	target.add_overlay(glow_appearance)
-	LAZYADD(target.update_overlays_on_z, glow_appearance)
+	parent_as_human.add_overlay(glow_appearance)
+	LAZYADD(parent_as_human.update_overlays_on_z, glow_appearance)
 	return glow_appearance
 
 #undef HOLOSYNTH_BRUTEMULT
 #undef HOLOSYNTH_BURNMULT
 #undef HOLOSYNTH_RANGE
+#undef HOLOSYNTH_OPACITY
