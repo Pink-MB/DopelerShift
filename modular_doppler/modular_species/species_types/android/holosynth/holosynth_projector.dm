@@ -13,8 +13,8 @@
 	damtype = BURN
 	force = 5
 
-	var/mob/living/carbon/human/linked_mob
-	var/turf/saved_loc
+	var/datum/weakref/linked_mob_ref
+	var/datum/weakref/saved_loc_ref
 
 
 /obj/item/holosynth_pen/Initialize(mapload, linked_mob)
@@ -22,13 +22,14 @@
 	AddElement(/datum/element/tool_renaming)
 
 	if(linked_mob)
-		src.linked_mob = linked_mob
-		saved_loc = get_turf(linked_mob)
+		linked_mob_ref = WEAKREF(linked_mob)
+		saved_loc_ref = WEAKREF(get_turf(linked_mob))
 
 		create_transform_component()
+		RegisterSignal(src, COMSIG_TRANSFORMING_PRE_TRANSFORM, PROC_REF(transform_check))
 		RegisterSignal(src, COMSIG_TRANSFORMING_ON_TRANSFORM, PROC_REF(on_transform))
 	else
-		src.linked_mob = null
+		linked_mob_ref = null
 
 	AddComponent( \
 		/datum/component/aura_healing, \
@@ -63,6 +64,9 @@
 	worn_icon_state = initial(worn_icon_state) + (active ? "_writing" : "")
 	update_appearance(UPDATE_ICON)
 
+	var/mob/living/carbon/human/linked_mob = linked_mob_ref?.resolve()
+	var/turf/saved_loc = saved_loc_ref?.resolve()
+
 	if(isnull(linked_mob))
 		return
 
@@ -78,49 +82,63 @@
 	return COMPONENT_NO_DEFAULT_MESSAGE
 
 /obj/item/holosynth_pen/Destroy()
-	if(linked_mob)
-		ASYNC
-			kill_that_mob()
-			linked_mob = null
-	. = ..()
+	var/mob/living/carbon/human/linked_mob = linked_mob_ref?.resolve()
 
-/obj/item/holosynth_pen/attack_self(mob/user)
-	if(user == linked_mob)
-		balloon_alert(user, "your projector will not allow you to modify it!")
-		return
+	if(linked_mob)
+		linked_mob.apply_status_effect(/datum/status_effect/holosynth_dissolving)
+		linked_mob.visible_message(
+			span_danger("[linked_mob]'s whole body begins to flicker, shudder and fall apart!"),
+ 			span_userdanger("You feel your projector being destroyed! Your form loses cohesion!")
+		)
 	. = ..()
 
 /obj/item/holosynth_pen/ranged_interact_with_atom(atom/interacting_with, mob/living/user, list/modifiers)
+
+	var/mob/living/carbon/human/linked_mob = linked_mob_ref?.resolve()
+
 	if(isnull(linked_mob))
-		return
+		return ITEM_INTERACT_FAILURE
 	if(user == linked_mob)
-		return
+		return ITEM_INTERACT_FAILURE
 	if(linked_mob.loc != src)
-		balloon_alert(user, "can't target while projection is active!")
-		return
-	var/turf/turf_target = get_turf(interacting_with)
-	if(turf_target.density == 1)
-		balloon_alert(user, "can't target a solid object!")
-		return
-	saved_loc = turf_target
-	balloon_alert(user, "location targetted.")
+		balloon_alert(user, "holosynth is active!")
+		return ITEM_INTERACT_FAILURE
+	if(interacting_with.density == 1)
+		balloon_alert(user, "solid object!")
+		return ITEM_INTERACT_FAILURE
+
+	saved_loc_ref = WEAKREF(get_turf(interacting_with))
+	balloon_alert(user, "location targeted")
 	playsound(src, 'sound/items/pen_click.ogg', 30, TRUE, -3)
+	return ITEM_INTERACT_SUCCESS
 
-/obj/item/holosynth_pen/proc/kill_that_mob()
-	if(isnull(linked_mob))
-		return
+/obj/item/holosynth_pen/interact_with_atom(atom/interacting_with, mob/living/user, list/modifiers)
+	var/turf/interacting_turf = interacting_with
+	var/mob/living/carbon/human/linked_mob = linked_mob_ref?.resolve()
 
-	linked_mob.visible_message(
-		span_danger("[linked_mob]'s whole body begins to flicker, shudder and fall apart!"),
-		span_userdanger("You feel your projector being destroyed! Your form loses cohesion!")
-	)
-	// You are GOING to GO no matter WHAT
-	var/holodestroyflags = IGNORE_USER_LOC_CHANGE | IGNORE_TARGET_LOC_CHANGE | IGNORE_HELD_ITEM | IGNORE_INCAPACITATED | IGNORE_SLOWDOWNS
-	if(do_after(linked_mob, 20 SECONDS, linked_mob, holodestroyflags))
-		linked_mob.gib(DROP_ALL_REMAINS & ~DROP_BODYPARTS) //bright side, your brain's in there. Someone'll use it I'm sure.
+	if(istype(interacting_turf))
+		if(isnull(linked_mob))
+			return ITEM_INTERACT_FAILURE
+		if(user == linked_mob)
+			return ITEM_INTERACT_FAILURE
+		if(linked_mob.loc != src)
+			balloon_alert(user, "holosynth is active!")
+			return ITEM_INTERACT_FAILURE
+		if(interacting_with.density == 1)
+			balloon_alert(user, "solid object!")
+			return ITEM_INTERACT_FAILURE
+
+		saved_loc_ref = WEAKREF(get_turf(interacting_with))
+		balloon_alert(user, "location targeted")
+		playsound(src, 'sound/items/pen_click.ogg', 30, TRUE, -3)
+		return ITEM_INTERACT_SUCCESS
+
+	else return NONE
 
 /obj/item/holosynth_pen/examine()
 	. = ..()
+	var/mob/living/carbon/human/linked_mob = linked_mob_ref?.resolve()
+
 	if(linked_mob)
 		. += span_info("This one belongs to [linked_mob].")
 
@@ -134,3 +152,32 @@
 		)
 	else
 		return null
+
+/obj/item/holosynth_pen/proc/transform_check(obj/item/source, mob/user, active)
+	SIGNAL_HANDLER
+
+	var/mob/living/carbon/human/linked_mob = linked_mob_ref?.resolve()
+
+	if(user == linked_mob)
+		balloon_alert(user, "can't modify yourself!")
+		return COMPONENT_BLOCK_TRANSFORM
+
+/// the DEATH effect
+/atom/movable/screen/alert/status_effect/holosynth_death_alert
+	name = "Projector Destroyed"
+	desc = "YOUR FORM COLLAPSES AT THE SEAMS, you are MELTING AWAY!!"
+	icon_state = "convulsing"
+
+/datum/status_effect/holosynth_dissolving
+	id = "holo_dissolve"
+	remove_on_fullheal = FALSE
+	duration = 30 SECONDS
+	show_duration = TRUE
+	alert_type = /atom/movable/screen/alert/status_effect/holosynth_death_alert
+
+/datum/status_effect/holosynth_dissolving/tick()
+	do_sparks(rand(2,6), FALSE, owner)
+
+/datum/status_effect/holosynth_dissolving/on_remove()
+	owner.gib(DROP_ALL_REMAINS & ~DROP_BODYPARTS) //bright side, your brain's in there. Someone'll use it I'm sure.
+

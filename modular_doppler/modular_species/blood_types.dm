@@ -19,7 +19,9 @@
 	restoration_chem = /datum/reagent/silicon
 	compatible_types = list(
 		/datum/blood_type/synthetic,
+		/datum/blood_type/holosynth,
 	)
+
 /datum/blood_type/holosynth/get_emissive_alpha(atom/source, is_worn = FALSE)
 	if (is_worn)
 		return 102

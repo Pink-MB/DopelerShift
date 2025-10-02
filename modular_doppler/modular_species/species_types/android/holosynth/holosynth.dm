@@ -27,8 +27,10 @@
 	)
 	gib_anim = "liquify"
 	exotic_bloodtype = BLOOD_TYPE_HOLOGEL
-	var/obj/item/holosynth_pen/owner_projector
-	var/glow
+	/// Our Holographic projector that we're going to make the owner of a leash component
+	var/datum/weakref/owner_projector_ref
+	/// Tracks the emissive overlay glow for later deletion
+	var/mutable_appearance/glow
 
 //Species Adding and Removal
 
@@ -36,8 +38,8 @@
 	. = ..()
 	var/mob/living/carbon/human/species_holder = target
 
-	species_holder.makeHologram_glowless()
-	glow = species_holder.makeEmisive()
+	make_hologram_glowless(0.5, species_holder)
+	make_emissive(species_holder)
 
 	species_holder.physiology.brute_mod *= HOLOSYNTH_BRUTEMULT
 	species_holder.physiology.burn_mod *= HOLOSYNTH_BURNMULT
@@ -47,8 +49,8 @@
 	species_holder.AddComponent(/datum/component/holographic_nature)
 
 	//Leashing time
-	owner_projector = new /obj/item/holosynth_pen (get_turf(species_holder), species_holder)
-	owner_projector.linked_mob = species_holder
+	var/obj/item/holosynth_pen/owner_projector = new /obj/item/holosynth_pen (get_turf(species_holder), species_holder)
+	owner_projector_ref = WEAKREF(owner_projector)
 	species_holder.put_in_hands(owner_projector)
 
 	species_holder.AddComponent(\
@@ -76,18 +78,18 @@
 
 	species_holder.remove_filter(list("HOLO: Color and Transparent","HOLO: Scanline"))
 	species_holder.cut_overlay(glow)
-	owner_projector.linked_mob = null
+
+	var/obj/item/holosynth_pen/pen_to_unlink = owner_projector_ref?.resolve()
+	if(pen_to_unlink)
+		pen_to_unlink.linked_mob_ref = null
+
 // Lore Box
-
-/datum/species/android/holosynth/get_species_description()
-	return "A Subtype of Android that consists of only the bases components along with a powerful electromagnet controller - All of this floating in a ferromagnetic aerogel that coats anything they wish to touch or wear"
-
 /datum/species/android/holosynth/get_species_lore()
-	return list(
-		"Somewhere between an android and a hologram, these semi-physical autonomous units are extremely vulnerable to heat and electricity\
-		 while early models were incapable of causing direct harm, advancements in dynamic aerogel density have made this a possibility.\
-		 A niche choice more popular among wealthy customers (silicon and uploaded organics alike) - their lack of robustness makes them somewhat inept for physical work, they were excellent at scounting or clerical work.",
-		 "As of late, the design of the required holoprojection equipment, has shrunk considerably; \
+	return list(\
+		"Somewhere between an android and a hologram, these semi-physical autonomous units are extremely vulnerable to heat and electricity \
+		A niche choice more popular among wealthy customers (silicon and uploaded organics alike) - their lack of robustness makes them somewhat inept for physical activity but they are excellent at scouting or clerical work.",
+
+		 "As of late the design of the required holoprojection equipment has shrunk considerably. \
 		 With an electromagnetic controller suite, hologram projection aparatus, and a ball point writing implement all fitting into the sleek pen chassis."
 	)
 
@@ -140,8 +142,8 @@
 	return perks
 
 //our own snowflake version of /atom/proc/makeHologram() without the glow
-/atom/proc/makeHologram_glowless(opacity = 0.5)
-	add_filter("HOLO: Color and Transparent", 1, color_matrix_filter(rgb(125,180,225, opacity * 255)))
+/datum/species/android/holosynth/proc/make_hologram_glowless(opacity = 0.5, mob/target)
+	target.add_filter("HOLO: Color and Transparent", 1, color_matrix_filter(rgb(125,180,225, opacity * 255)))
 	var/atom/movable/scanline = new(null)
 	scanline.icon = 'icons/effects/effects.dmi'
 	scanline.icon_state = "scanline"
@@ -149,23 +151,23 @@
 	var/static/uid_scan = 0
 	scanline.render_target = "*HoloScanline [uid_scan]"
 	uid_scan++
-	add_filter("HOLO: Scanline", 2, alpha_mask_filter(render_source = scanline.render_target))
-	add_overlay(scanline)
+	target.add_filter("HOLO: Scanline", 2, alpha_mask_filter(render_source = scanline.render_target))
+	target.add_overlay(scanline)
 	qdel(scanline)
 
-/atom/proc/makeEmisive()
-	if(!render_target)
+/datum/species/android/holosynth/proc/make_emissive(mob/target)
+	if(!target.render_target)
 		var/static/uid = 0
-		render_target = "HOLOGRAM [uid]"
+		target.render_target = "HOLOGRAM [uid]"
 		uid++
 	var/static/atom/movable/render_step/emissive/glow
 	if(!glow)
 		glow = new(null)
-	glow.render_source = render_target
-	SET_PLANE_EXPLICIT(glow, initial(glow.plane), src)
+	glow.render_source = target.render_target
+	SET_PLANE_EXPLICIT(glow, initial(glow.plane), target)
 	var/mutable_appearance/glow_appearance = new(glow)
-	add_overlay(glow_appearance)
-	LAZYADD(update_overlays_on_z, glow_appearance)
+	target.add_overlay(glow_appearance)
+	LAZYADD(target.update_overlays_on_z, glow_appearance)
 	return glow_appearance
 
 #undef HOLOSYNTH_BRUTEMULT
