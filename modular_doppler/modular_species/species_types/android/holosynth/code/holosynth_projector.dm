@@ -1,9 +1,9 @@
 /obj/item/holosynth_pen
-	name = "Holosynth Projector-Magnet Combo"
+	name = "holosynth projector-magnet combo"
 	desc = "A complex mechanism that both projects the form of a hologram and manipulates its aerogel canvas. \
 	Miraculously, it also doubles as a pen."
-	icon = 'modular_doppler/modular_species/species_types/android/holosynth/holosynth_pen.dmi'
-	worn_icon = 'modular_doppler/modular_species/species_types/android/holosynth/holosynth_pen.dmi'
+	icon = 'modular_doppler/modular_species/species_types/android/holosynth/icons/holosynth_pen.dmi'
+	worn_icon = 'modular_doppler/modular_species/species_types/android/holosynth/icons/holosynth_pen.dmi'
 	icon_state = "Holopen"
 	worn_icon_state = "w_holopen"
 	slot_flags = ITEM_SLOT_BELT | ITEM_SLOT_EARS
@@ -13,7 +13,9 @@
 	damtype = BURN
 	force = 5
 
+	//Weakref to the Mob this pen leashes and contains
 	var/datum/weakref/linked_mob_ref
+	//Weakref to the tile this pen saves to deploy the mob to and from
 	var/datum/weakref/saved_loc_ref
 
 
@@ -103,7 +105,7 @@
 	if(linked_mob.loc != src)
 		balloon_alert(user, "holosynth is active!")
 		return ITEM_INTERACT_FAILURE
-	if(interacting_with.density == 1)
+	if(interacting_with.density)
 		balloon_alert(user, "solid object!")
 		return ITEM_INTERACT_FAILURE
 

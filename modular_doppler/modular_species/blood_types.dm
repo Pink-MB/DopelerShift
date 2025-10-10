@@ -18,7 +18,6 @@
 	color = BLOOD_COLOR_HOLOGEL
 	restoration_chem = /datum/reagent/silicon
 	compatible_types = list(
-		/datum/blood_type/synthetic,
 		/datum/blood_type/holosynth,
 	)
 
