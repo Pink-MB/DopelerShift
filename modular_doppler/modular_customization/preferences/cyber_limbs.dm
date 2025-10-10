@@ -142,7 +142,7 @@ GLOBAL_LIST_INIT(frame_type_names, list(
 /datum/preference/choiced/head_type/is_accessible(datum/preferences/preferences)
 	. = ..()
 	var/species = preferences.read_preference(/datum/preference/choiced/species)
-	if(istype(species, /datum/species/android)) // lifting this restriction would require code for the head's internal organs to become cybernetic too
+	if(ispath(species, /datum/species/android)) // lifting this restriction would require code for the head's internal organs to become cybernetic too
 		return TRUE
 	return FALSE
 
