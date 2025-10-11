@@ -13,9 +13,9 @@
 	damtype = BURN
 	force = 5
 
-	//Weakref to the Mob this pen leashes and contains
+	///Weakref to the Mob this pen leashes and contains
 	var/datum/weakref/linked_mob_ref
-	//Weakref to the tile this pen saves to deploy the mob to and from
+	///Weakref to the tile this pen saves to deploy the mob to and from
 	var/datum/weakref/saved_loc_ref
 
 
@@ -73,13 +73,17 @@
 		return COMPONENT_NO_DEFAULT_MESSAGE
 
 	if(active) //If you WERE active we save loc and place our creature into pen
-		saved_loc = get_turf(linked_mob)
-		new /obj/effect/temp_visual/guardian/phase/out (saved_loc)
+		saved_loc_ref = WEAKREF(get_turf(linked_mob))
+		new /obj/effect/temp_visual/guardian/phase/out (get_turf(linked_mob))
 		linked_mob.unequip_everything()
-		linked_mob.loc = src
+		linked_mob.forceMove(src)
 	else	//Otherwise, put the hologram back
-		linked_mob.loc = saved_loc
-		new /obj/effect/temp_visual/guardian/phase (get_turf(linked_mob))
+		if(get_dist(linked_mob, src) <= HOLOSYNTH_RANGE)
+			linked_mob.forceMove(saved_loc)
+			new /obj/effect/temp_visual/guardian/phase (get_turf(linked_mob))
+		else
+			balloon_alert(user, "too far!")
+			saved_loc_ref = WEAKREF(get_turf(linked_mob))
 
 	return COMPONENT_NO_DEFAULT_MESSAGE
 
@@ -126,7 +130,7 @@
 		if(linked_mob.loc != src)
 			balloon_alert(user, "holosynth is active!")
 			return ITEM_INTERACT_FAILURE
-		if(interacting_with.density == 1)
+		if(interacting_with.density)
 			balloon_alert(user, "solid object!")
 			return ITEM_INTERACT_FAILURE
 

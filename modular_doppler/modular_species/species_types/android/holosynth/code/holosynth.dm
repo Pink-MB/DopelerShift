@@ -143,6 +143,8 @@
 /datum/species/android/holosynth/get_species_description()
 	return "Holosynths are a subtype of Androids; they're made of soft-light, only semi-solid and dependant on a projection device"
 
+
+//Preview stuff
 /datum/outfit/holosynth_preview
 	name = "Holosynth (Species Preview)"
 
@@ -160,7 +162,8 @@
 	regenerate_organs(human_for_preview)
 	human_for_preview.update_body(is_creating = TRUE)
 
+/mob/living/carbon/human/species/holosynth
+	race = /datum/species/android/holosynth
 
 #undef HOLOSYNTH_BRUTEMULT
 #undef HOLOSYNTH_BURNMULT
-#undef HOLOSYNTH_RANGE
