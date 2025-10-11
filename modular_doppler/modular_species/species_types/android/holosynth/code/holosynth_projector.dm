@@ -1,3 +1,6 @@
+/// How far a holosynth can stray from their projector pen
+#define HOLOSYNTH_RANGE 9
+
 /obj/item/holosynth_pen
 	name = "holosynth projector-magnet combo"
 	desc = "A complex mechanism that both projects the form of a hologram and manipulates its aerogel canvas. \
@@ -19,7 +22,7 @@
 	var/datum/weakref/saved_loc_ref
 
 
-/obj/item/holosynth_pen/Initialize(mapload, linked_mob)
+/obj/item/holosynth_pen/Initialize(mapload, mob/living/carbon/human/linked_mob)
 	. = ..()
 	AddElement(/datum/element/tool_renaming)
 
@@ -30,6 +33,15 @@
 		create_transform_component()
 		RegisterSignal(src, COMSIG_TRANSFORMING_PRE_TRANSFORM, PROC_REF(transform_check))
 		RegisterSignal(src, COMSIG_TRANSFORMING_ON_TRANSFORM, PROC_REF(on_transform))
+
+		linked_mob.AddComponent(\
+			/datum/component/leash,\
+			owner = src,\
+			distance = HOLOSYNTH_RANGE,\
+			force_teleport_out_effect = /obj/effect/temp_visual/guardian/phase/out,\
+			force_teleport_in_effect = /obj/effect/temp_visual/guardian/phase,\
+		)
+
 	else
 		linked_mob_ref = null
 
@@ -187,3 +199,4 @@
 /datum/status_effect/holosynth_dissolving/on_remove()
 	owner.gib(DROP_ALL_REMAINS & ~DROP_BODYPARTS) //bright side, your brain's in there. Someone'll use it I'm sure.
 
+#undef HOLOSYNTH_RANGE

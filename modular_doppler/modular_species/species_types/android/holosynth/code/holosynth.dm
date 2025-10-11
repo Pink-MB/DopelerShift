@@ -1,6 +1,7 @@
+/// Holosynth Incoming Brute damage multiplier
 #define HOLOSYNTH_BRUTEMULT 3
+/// Holosynth Incoming Burn damage multiplier
 #define HOLOSYNTH_BURNMULT 5
-#define HOLOSYNTH_RANGE 9
 
 /datum/species/android/holosynth
 	name = "Holosynth"
@@ -47,19 +48,11 @@
 	species_holder.AddComponent(/datum/component/holographic_nature)
 	species_holder.AddComponent(/datum/component/holosynth_effects)
 
-	//Leashing time
+	//Projector creation, leashing component found in /obj/item/holosynth_pen/Initialize(...)
 	if(!isdummy(species_holder))
 		var/obj/item/holosynth_pen/owner_projector = new /obj/item/holosynth_pen (get_turf(species_holder), species_holder)
 		owner_projector_ref = WEAKREF(owner_projector)
 		species_holder.put_in_hands(owner_projector)
-
-		species_holder.AddComponent(\
-			/datum/component/leash,\
-			owner = owner_projector,\
-			distance = HOLOSYNTH_RANGE,\
-			force_teleport_out_effect = /obj/effect/temp_visual/guardian/phase/out,\
-			force_teleport_in_effect = /obj/effect/temp_visual/guardian/phase,\
-		)
 
 /datum/species/android/holosynth/on_species_loss(mob/living/carbon/target, datum/species/new_species, pref_load)
 	. = ..()

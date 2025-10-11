@@ -1,3 +1,4 @@
+/// How opaque vs. see-through holosynths are
 #define HOLOSYNTH_OPACITY 0.6
 
 /datum/component/holosynth_effects
