@@ -14,6 +14,7 @@
 	dust_image.override = TRUE
 	apply_wibbly_filters(dust_image)
 	add_alt_appearance(/datum/atom_hud/alternate_appearance/basic/pheromone_user, "moth_dust", dust_image)
+	new /obj/effect/particle_effect/sparks/quantum(get_turf(src))
 
 /obj/effect/moth_dust/examine(mob/user)
 	. = ..()
@@ -30,6 +31,7 @@
 		if(!do_after(user, 2 SECONDS ))
 			return
 		message = new_message
+		new /obj/effect/particle_effect/sparks/quantum(get_turf(src))
 
 
 /obj/effect/moth_dust/attack_hand_secondary(mob/user, list/modifiers)
