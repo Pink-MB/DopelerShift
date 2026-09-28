@@ -25,14 +25,10 @@
 
 /datum/species/moth/on_species_gain(mob/living/carbon/human/human_who_gained_species, datum/species/old_species, pref_load, regenerate_icons)
 	. = ..()
-	RegisterSignal(human_who_gained_species, COMSIG_ATOM_ATTACKBY, PROC_REF(on_attackby))
-
 	human_who_gained_species.AddComponent(/datum/component/pheromone_user)
 
 /datum/species/moth/on_species_loss(mob/living/carbon/human/C, datum/species/new_species, pref_load)
 	. = ..()
-	UnregisterSignal(C, COMSIG_ATOM_ATTACKBY)
-
 	var/comp = C.GetComponent(/datum/component/pheromone_user)
 	qdel(comp)
 
