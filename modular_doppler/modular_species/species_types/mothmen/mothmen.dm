@@ -36,9 +36,3 @@
 	var/comp = C.GetComponent(/datum/component/pheromone_user)
 	qdel(comp)
 
-//From the original Mothmen.dm file
-/datum/species/moth/on_attackby(mob/living/source, obj/item/attacking_item, mob/living/attacker, list/modifiers, list/attack_modifiers)
-	SIGNAL_HANDLER
-
-	if(istype(attacking_item, /obj/item/melee/flyswatter))
-		MODIFY_ATTACK_FORCE_MULTIPLIER(attack_modifiers, 10) // Yes, a 10x damage modifier
