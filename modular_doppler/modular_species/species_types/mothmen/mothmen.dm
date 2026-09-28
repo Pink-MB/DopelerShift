@@ -22,3 +22,23 @@
 	moth_for_preview.set_hairstyle("Cotton (Alt)", update = TRUE)
 	regenerate_organs(moth_for_preview)
 	moth_for_preview.update_body(is_creating = TRUE)
+
+/datum/species/moth/on_species_gain(mob/living/carbon/human/human_who_gained_species, datum/species/old_species, pref_load, regenerate_icons)
+	. = ..()
+	RegisterSignal(human_who_gained_species, COMSIG_ATOM_ATTACKBY, PROC_REF(on_attackby))
+
+	human_who_gained_species.AddComponent(/datum/component/pheromone_user)
+
+/datum/species/moth/on_species_loss(mob/living/carbon/human/C, datum/species/new_species, pref_load)
+	. = ..()
+	UnregisterSignal(C, COMSIG_ATOM_ATTACKBY)
+
+	var/comp = C.GetComponent(/datum/component/pheromone_user)
+	qdel(comp)
+
+//From the original Mothmen.dm file
+/datum/species/moth/on_attackby(mob/living/source, obj/item/attacking_item, mob/living/attacker, list/modifiers, list/attack_modifiers)
+	SIGNAL_HANDLER
+
+	if(istype(attacking_item, /obj/item/melee/flyswatter))
+		MODIFY_ATTACK_FORCE_MULTIPLIER(attack_modifiers, 10) // Yes, a 10x damage modifier
